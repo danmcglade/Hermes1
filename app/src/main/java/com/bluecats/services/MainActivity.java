@@ -42,6 +42,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+/**
+ * The type Main activity.
+ */
 public class MainActivity extends Activity implements View.OnClickListener{
     private static final String TAG = "MainActivity";
     private TextView mTxtMessage;
@@ -49,17 +52,30 @@ public class MainActivity extends Activity implements View.OnClickListener{
     //private
     private Button mButton;
     private Button mButton2;
-    private Button showNotificationBut, stopNotificationBut, alertButton, sendEmail;
-    private Map<BCBeacon, AtomicBoolean> beaconMap = new HashMap<BCBeacon, AtomicBoolean>();
+    private Button  sendEmail;          // button to send email.
+    private Map<BCBeacon, AtomicBoolean> beaconMap = new HashMap<BCBeacon, AtomicBoolean>(); // Map to hold beacon details
+                                                            // having beacon and atomic boolean and key, value pair
     private String beaconName = "";
 
 
+    /**
+     * The Notification manager.
+     */
     NotificationManager notificationManager;
 
+    /**
+     * The Is notific active.
+     */
     boolean isNotificActive = false;
 
+    /**
+     * The Notif id.
+     */
     int notifID = 33;
 
+    /**
+     * The M bc beacon manager.
+     */
     BCBeaconManager mBCBeaconManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,14 +93,16 @@ public class MainActivity extends Activity implements View.OnClickListener{
         mButton.setOnClickListener(this);
         mButton2.setOnClickListener(this);
 
-        final EditText beaconNameET = (EditText) findViewById(R.id.BeaconNameET);
-        Button submitButton = (Button)findViewById(R.id.SubmitButton);
+        final EditText beaconNameET = (EditText) findViewById(R.id.BeaconNameET);           // Edit text to enter beacon name
+        Button submitButton = (Button)findViewById(R.id.SubmitButton);                      // Button to submit beacon name
+
+        // Anonymous class to perform action when submitButton is clicked.
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                beaconName = beaconNameET.getText().toString();
+                beaconName = beaconNameET.getText().toString();     // getting the string from user and casting it to String
 
-                beaconNameET.setText("");
+                beaconNameET.setText("");       // resetting the edit text back to empty string ""
 
             }
         });
@@ -102,13 +120,15 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
 
 
-
-
+    /**
+     * Send email.
+     */
+// Method to send Email  @https://www.tutorialspoint.com/android/android_sending_email.htm
     protected void sendEmail() {
 
         Log.i("Send email", "");
-        String[] TO = {"deepguru80@gmail.com"};
-        String[] CC = {"kabir8090@gmail.com"};
+        String[] TO = {"xyz@gmail.com"};
+        String[] CC = {"abc@gmail.com"};
 
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
 
@@ -132,45 +152,10 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     }
 
-    public void showNotification(View v) {
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this );
-
-        builder.setSmallIcon(R.drawable.ic_launcher1);
-        builder.setContentTitle("My Notification");
-        builder.setContentText("This is my first notificaation...  ");
-        builder.setTicker("Alert New Message");
-        builder.setSmallIcon(R.drawable.ic_launcher1);
-
-        Intent intent = new Intent(this,SecondClass.class);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-
-        stackBuilder.addParentStack(SecondClass.class);
-        stackBuilder.addNextIntent(intent);
-
-        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-
-        builder.setContentIntent(pendingIntent);
-
-        NotificationManager NM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NM.notify(0,builder.build());
-
-        isNotificActive = true;
-
-
-    }
-
-
-    public void stopNotification(View v) {
-
-        if (isNotificActive)
-        {
-            notificationManager.cancel(notifID);
-        }
-    }
-
-
+    /**
+     * The M callback.
+     */
     BCBeaconManagerCallback mCallback = new BCBeaconManagerCallback() {
         @Override
         public void didEnterSite(BCSite site) {
@@ -190,6 +175,8 @@ public class MainActivity extends Activity implements View.OnClickListener{
             Log.d(TAG, "didDetermineState "+forSite.getName());
         }
 
+
+        // Method used to track specific beacon.
         @Override
         public void didEnterBeacons(List<BCBeacon> beacons) {
             super.didEnterBeacons(beacons);
@@ -197,14 +184,16 @@ public class MainActivity extends Activity implements View.OnClickListener{
             Log.d(TAG, "didEnterBeacons "+getBeaconNames(beacons));
 
 
+            // Enhanced for loop to go through "beacons" array.
             for(BCBeacon beacon : beacons) {
+                // Checking for specific beacon
                 if (beacon.getName().equalsIgnoreCase(beaconName)) {
 
-                    CheckBox rangeCB = (CheckBox) findViewById(R.id.rangeCB);
+                    CheckBox rangeCB = (CheckBox) findViewById(R.id.rangeCB); // Set the range check Box
 
-                    rangeCB.setText("In range of " + beaconName);
+                    rangeCB.setText("In range of " + beaconName);   // Display the text message when specific beacon is in range.
 
-                    rangeCB.setChecked(true);
+                    rangeCB.setChecked(true);       // Setting the check mark to true
 
 
                     if (beaconMap.containsKey(beacon))
@@ -247,25 +236,28 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
 
 
+        // Method to track exiting beacon
         @Override
         public void didExitBeacons(List<BCBeacon> beacons) {
             super.didExitBeacons(beacons);
             Log.d(TAG, "didExitBeacons "+getBeaconNames(beacons));
 
+            // Enhanced for loop to go through "beacons" array.
             for (BCBeacon beacon : beacons)
             {
+                // Checking for condition where beacon is out of range and beaconMap has the key.
                 if (beacon.getName().equalsIgnoreCase(beaconName) && beaconMap.containsKey(beacon))
                 {
 
-                    CheckBox rangeCB = (CheckBox) findViewById(R.id.rangeCB);
+                    CheckBox rangeCB = (CheckBox) findViewById(R.id.rangeCB); // Set the check box for exiting becon
 
-                    rangeCB.setText("Out of range of " + beaconName);
+                    rangeCB.setText("Out of range of " + beaconName); // Displaying the text message when beacon is out of range.
 
-                    rangeCB.setChecked(false);
-                    beaconMap.get(beacon).set(false);
-                    TextView timerTV = (TextView) findViewById(R.id.timerTV);
-                    timerTV.setVisibility(View.VISIBLE);
-                    new ExitTimerAsyncTask(beacon,timerTV).execute();
+                    rangeCB.setChecked(false);          // Removing the check mark
+                    beaconMap.get(beacon).set(false);   // setting the value of beaconMap to false when beacon is out of range
+                    TextView timerTV = (TextView) findViewById(R.id.timerTV); // Setting the time out countdown
+                    timerTV.setVisibility(View.VISIBLE);    // setting the time out countdown to visible
+                    new ExitTimerAsyncTask(beacon,timerTV).execute(); // executing the ExitTimerAsyncTask in back ground when time out counter is over to send email.
                 }
             }
         }
@@ -420,6 +412,12 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
         }
     }
+
+    /**
+     * Sets alarm.
+     *
+     * @param v the v
+     */
     public void setAlarm (View v) {
 
         Long alertTime = new GregorianCalendar().getTimeInMillis()+5*1000;
@@ -433,13 +431,38 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
 
 
+    /**
+     * The type Exit timer async task.
+     */
+// inner class to have the sendEmail method called in background when beacon exit out of range
     class ExitTimerAsyncTask extends AsyncTask <Void, String, Void>
 
 
     {
+        /**
+         * The Beacon.
+         */
         BCBeacon beacon;
+        /**
+         * The Timer tv.
+         */
         TextView timerTV;
+        /**
+         * The Wait time.
+         */
         int waitTime = 5;
+
+        /**
+         * Instantiates a new Exit timer async task.
+         *
+         * @param beacon  the beacon
+         * @param timerTV the timer tv
+         */
+/*
+        @param beacon
+        @param  timerTV
+        ExitTimerAsycTask constructor
+         */
         public ExitTimerAsyncTask (BCBeacon beacon, TextView timerTV)
         {
             this.beacon = beacon;
@@ -448,6 +471,10 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
 
         @Override
+
+        /*
+        doInBackground method for sleep time and setting the count down.
+         */
         public Void doInBackground(Void ... params)
         {
 
@@ -466,6 +493,9 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
         }
 
+        /*
+        onProgressUpdate : To display the time out countdown.
+         */
         @Override
         public void onProgressUpdate(String ... params)
         {
@@ -473,6 +503,9 @@ public class MainActivity extends Activity implements View.OnClickListener{
         }
 
 
+        /*
+        onPostExecute - Method to trigger sendEmail method
+         */
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
